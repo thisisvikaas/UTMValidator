@@ -3,7 +3,9 @@
 import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Inter } from 'next/font/google'
 
+const inter = Inter({ subsets: ['latin'] })
 
 type Channel = {
   name: string
