@@ -80,6 +80,7 @@ export default function Home() {
   const [url, setUrl] = useState('')
   const [parsedParams, setParsedParams] = useState<Record<string, string>>({})
   const [identifiedChannel, setIdentifiedChannel] = useState<string>('')
+  const [error, setError] = useState<string>('')
 
   const identifyChannel = (utmParams: Record<string, string>) => {
     const source = utmParams['utm_source']?.toLowerCase()
@@ -170,6 +171,8 @@ export default function Home() {
 
   const parseUTMParams = (inputUrl: string) => {
     try {
+      setError('')
+      
       const urlObj = new URL(inputUrl)
       const utmParams: Record<string, string> = {}
       
@@ -180,12 +183,20 @@ export default function Home() {
           utmParams[key] = value
         }
       }
+
+      if (!utmParams['utm_source'] && !utmParams['utm_medium']) {
+        setError('URL must contain at least utm_source or utm_medium parameters')
+        setParsedParams({})
+        setIdentifiedChannel('')
+        return
+      }
       
       setParsedParams(utmParams)
       setIdentifiedChannel(identifyChannel(utmParams))
-    } catch {
+    } catch (err) {
       setParsedParams({})
       setIdentifiedChannel('')
+      setError('Please enter a valid URL')
     }
   }
 
@@ -212,14 +223,21 @@ export default function Home() {
           </p>
         </div>
 
-        <Input
-          type="url"
-          placeholder="https://example.com/?utm_source=google&utm_medium=cpc&utm_campaign=spring_sale"
-          value={url}
-          onChange={handleUrlChange}
-          onKeyPress={handleKeyPress}
-          className="w-full text-lg p-6"
-        />
+        <div className="space-y-2">
+          <Input
+            type="url"
+            placeholder="https://example.com/?utm_source=google&utm_medium=cpc&utm_campaign=spring_sale"
+            value={url}
+            onChange={handleUrlChange}
+            onKeyPress={handleKeyPress}
+            className={`w-full text-lg p-6 ${error ? 'border-red-500' : ''}`}
+          />
+          {error && (
+            <div className="text-red-500 text-sm p-2">
+              {error}
+            </div>
+          )}
+        </div>
 
         {Object.keys(parsedParams).length > 0 && (
           <Card className="bg-green-50 border-0">
